@@ -945,6 +945,25 @@ const exportWordPack = () => {
   URL.revokeObjectURL(url);
 };
 
+const exportDocxDesktop = async () => {
+  if (!window.__TAURI__) {
+    alert("DOCX export is available in the desktop app.");
+    return;
+  }
+  try {
+    const { invoke, dialog } = window.__TAURI__;
+    const savePath = await dialog.save({ filters: [{ name: "Word Document", extensions: ["docx"] }] });
+    if (!savePath) return;
+    const payload = { ...state };
+    const result = await invoke("generate_docx", { payloadJson: JSON.stringify(payload, null, 2), outputPath: savePath });
+    const parsed = JSON.parse(result);
+    if (parsed.error) throw new Error(parsed.error);
+    alert("DOCX saved.");
+  } catch (err) {
+    alert(`DOCX export failed: ${err.message}`);
+  }
+};
+
 const exportWordCurrent = () => {
   const active = document.querySelector(".tab.active")?.dataset.doc || "cert63";
   const html = templates[active] ? templates[active]() : "";
@@ -1062,8 +1081,8 @@ document.getElementById("btn-print").addEventListener("click", printCurrent);
 document.getElementById("btn-pack").addEventListener("click", exportPrintPack);
 document.getElementById("btn-pdf-one").addEventListener("click", exportPrintCurrent);
 document.getElementById("btn-pdf-all").addEventListener("click", exportPrintPack);
-document.getElementById("btn-docx-one").addEventListener("click", exportWordCurrent);
-document.getElementById("btn-docx-all").addEventListener("click", exportWordPack);
+document.getElementById("btn-docx-one").addEventListener("click", exportDocxDesktop);
+document.getElementById("btn-docx-all").addEventListener("click", exportDocxDesktop);
 const jsonBtn = document.createElement("button");
 jsonBtn.className = "btn btn-ghost";
 jsonBtn.textContent = "Export Case JSON";
