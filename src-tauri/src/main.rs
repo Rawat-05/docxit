@@ -1,8 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::process::Command;
-use std::path::PathBuf;
-
 #[tauri::command]
 fn extract_docx(path: String) -> Result<String, String> {
     let mut script_path = std::env::current_dir()
